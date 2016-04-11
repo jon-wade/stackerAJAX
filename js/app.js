@@ -31,6 +31,29 @@ var showQuestion = function(question) {
 	return result;
 };
 
+//similar pattern for the second answerers query
+var showAnswerers = function (answerers) {
+	var result = $('.templates .answerer').clone();
+
+	//set the display-name element
+	var displayElem = result.find('dd.display-name');
+	displayElem.text(answerers.user.display_name);
+
+	//set the reputation score
+	var reputation = result.find('dd.reputation');
+	reputation.text(answerers.user.reputation);
+
+	//set link to StackOverflow
+	var link = result.find('dd.link a');
+	link.attr('href', answerers.user.link);
+	link.text(answerers.user.link);
+
+	//set the post count
+	var postCount = result.find('dd.post-count');
+	postCount.text(answerers.post_count);
+
+	return result;
+};
 
 // this function takes the results object from StackOverflow
 // and returns the number of results and tags to be appended to DOM
@@ -82,6 +105,37 @@ var getUnanswered = function(tags) {
 	});
 };
 
+//use getUnanswered as template and customise to get answerer
+
+var getInspiration = function(answerers) {
+
+	//no need for a request object for this API query - it takes a different (simpler) form for the tag query as below
+
+	var url = "http://api.stackexchange.com/2.2/tags/" + answerers + "/top-answerers/month?site=stackoverflow";
+
+	$.ajax({
+			url: url,
+			dataType: "jsonp",//use jsonp to avoid cross origin issues
+			type: "GET"
+	})
+
+	//took bloody ages to figure out that you have to use this stupid .done method to access the returned object
+	.done(function(result){ //this waits for the ajax to return with a successful promise object
+		console.log(result);
+			$('.search-results').html('<p></p>'); //place a space before the search results as the JSON always returns 20 objects
+
+			$.each(result.items, function(i, item) {
+				var ans = showAnswerers(item);
+				console.log(ans);
+				$('.results').append(ans);
+			});
+		})
+	.fail(function(jqXHR, error){ //this waits for the ajax to return with an error promise object
+		var errorElem = showError(error);
+		$('.search-results').append(errorElem);
+	});
+};
+
 
 $(document).ready( function() {
 	$('.unanswered-getter').submit( function(e){
@@ -100,8 +154,7 @@ $(document).ready( function() {
 		$('.results').html('');
 		// get the value of the tags the user submitted
 		var answerers = $(this).find("input[name='answerers']").val();
-		//getInspiration(tags);
-		console.log("inspiration getter click working: " + answerers);
+		getInspiration(answerers);
 	});
 
 
