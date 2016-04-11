@@ -64,6 +64,7 @@ var getUnanswered = function(tags) {
 		dataType: "jsonp",//use jsonp to avoid cross origin issues
 		type: "GET",
 	})
+
 	.done(function(result){ //this waits for the ajax to return with a succesful promise object
 		var searchResults = showSearchResults(request.tagged, result.items.length);
 
@@ -91,4 +92,18 @@ $(document).ready( function() {
 		var tags = $(this).find("input[name='tags']").val();
 		getUnanswered(tags);
 	});
+
+	//use the code for unanswered-getter and amend for the answerers form field
+	$('.inspiration-getter').submit( function(e){
+		e.preventDefault();
+		// zero out results if previous search has run
+		$('.results').html('');
+		// get the value of the tags the user submitted
+		var answerers = $(this).find("input[name='answerers']").val();
+		//getInspiration(tags);
+		console.log("inspiration getter click working: " + answerers);
+	});
+
+
+
 });
